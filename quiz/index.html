@@ -1,0 +1,180 @@
+<!-- Question & Answer Screen -->
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Quiz 25</title>
+		<link rel="icon" href="../img/favicon.ico">
+		<link rel="stylesheet" href="../style/master.css">
+		<style>
+			#progress {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				width: 100vw;
+			}
+
+			#options {
+				justify-content:center;
+				align-content: flex-start;
+				display: grid;
+				grid-template-columns: 40vw;
+				gap: 10px;
+				counter-reset: rank 0;
+			}
+
+			#answer > div {
+				display: grid;
+				justify-content: center;
+				align-content: center;
+				grid-template-columns: 20vw 60vw;
+				gap: 8vw;
+			}
+
+			#answericon {
+				width: 100%;
+				height: auto;
+			}
+
+			#sharebutton::after {
+				content: "";
+				display: inline-block;
+				position: absolute;
+				width: 30px;
+				height: 30px;
+				bottom: 5px;
+				right: 10px;
+				background-image: url("../img/share.png");
+				background-size: contain;
+				vertical-align: middle;
+			}
+			
+		</style>
+		<script src="../js/transition.js"></script>
+		<script src="./question_orders.js"></script>
+		<script src="./question_screen.js"></script>
+		<script src="./score.js"></script>
+		<script src="./timer.js"></script>
+		<script src="./answer_screen.js"></script>
+		<script>
+
+			var section_question;
+			var section_answer;
+
+			const courses = {
+				GATTSURI: "ガッツリコース",
+				OTEGARU: "お手軽コース",
+				JUKEN: "受験コース"
+			};
+
+			window.onload = function() {
+				section_question = document.getElementById("question");
+				section_answer = document.getElementById("answer");
+
+				let url = new URL(location.href);
+				course = url.searchParams.get("course");
+				if (course != "GATTSURI" && course != "OTEGARU" && course != "JUKEN") {
+					location.href = "../index.html";
+				}
+
+				document.getElementById("course_label").textContent = courses[course];
+				document.getElementById("course_icon").setAttribute("src", "../img/" + course + ".png");
+				
+				// 問題リストを受信する
+				let requestURL = "https://raw.githubusercontent.com/bull-frog/personal/main/courses.json";
+				let request = new XMLHttpRequest();
+				request.open("GET", requestURL);
+				request.responseType = "json";
+				request.send();
+
+				request.onload = function() {
+					questions = request.response[course];
+					nextQuestion();
+				}
+				
+			}
+
+			function onSelectOption(index) {
+				displayAnswer(index);
+				section_question.classList.add("fadeOut");
+				setTimeout(() => {
+					section_question.classList.add("gone");
+					window.scrollTo(0, 0);
+					section_answer.classList.remove("gone");
+					section_answer.classList.remove("fadeOut");
+				}, 200);
+			}
+
+			function closeAnswer() {
+				document.getElementById("nextbutton").disabled = true;
+				if (questionDoesRemain()) {
+					nextQuestion();
+				} else {
+					localStorage.setItem("temporary", totalScore());
+					transit("./result.html?course=" + course);
+				}
+			}
+
+			function onClickLogo() {
+				if (window.confirm("本当にこのページを離れますか？\n進行内容は保存されません。")) {
+					transit("../index.html");
+				}
+			}
+
+			function share() {
+				window.open("../share/share_question.html?qId=" + currentQuestion.qId);
+			}
+
+		</script>
+	</head>
+	<body>
+		
+		<header>
+			<a onclick="onClickLogo()" class="left"><img src="../img/quiz25.png"></a>
+			<!-- <a class="right"><img src="../img/hamburger.png"></a> -->
+		</header>
+
+		<div class="fader coverScreen">
+
+			<div id="progress">
+				<img id="course_icon" src="../img/GATTSURI.png" style="width: 60px; height: 60px">　
+				<h3 id="course_label"></h3>　
+				<h2 id="qnumber">第0/0問</h2>
+			</div>
+			
+			<div id="question" class="fader">
+				東大生平均解答時間<span id="avetime"></span>秒
+
+				<h1 id="question_sentence"></h1><br>
+
+				<div style="display: flex; justify-content: center; align-content: flex-start;">
+					<img id="question_image" style="width: 24vw; margin-right: 10vw;">
+					<div id="options">
+					</div>
+				</div>
+			</div>
+
+			<div id="answer" class="fader gone fadeOut" style="margin-top: 60px;">
+				
+				<div style="justify-content: center; margin-bottom: 10vh;">
+					<img id="answericon" src="../img/ok.png">
+
+					<div style="text-align: left;">
+						<h1 id="judge" style="font-size: 260%; margin-top: 0;"></h1>
+						<span id="comment"></span>
+						<br><br>
+						解答時間：<span id="time"></span>秒<br>
+						得点：<span id="score"></span>点
+					</div>
+				</div>
+				<button id="sharebutton" onclick="share()" class="secondary blue">問題をシェア</button>
+				<br><br>
+				<button id="nextbutton" onclick="closeAnswer()" class="primary red triangle" style="width: 300px">次へ</button>
+
+			</div>
+
+		</div>
+
+
+	</body>
+</html>

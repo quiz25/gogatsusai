@@ -1,0 +1,196 @@
+<!-- Show the result of the game. -->
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Quiz 25</title>
+		<link rel="icon" href="../img/favicon.ico">
+		<link rel="stylesheet" href="../style/master.css">
+		<style>
+			#progress {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				width: 100vw;
+			}
+
+			#totalscore, #judgement_label {
+				font-size: 300%;
+			}
+
+			#menu {
+				padding-left: 10vw;
+				padding-right: 10vw;
+				display: grid;
+				justify-content: center;
+				grid-template-columns: 1fr 1fr 1fr;
+				gap: 5vw;
+			}
+
+			#share::after {
+				content: "";
+				display: inline-block;
+				position: absolute;
+				width: 40px;
+				height: 40px;
+				bottom: 10px;
+				right: 20px;
+				background-image: url("../img/share.png");
+				background-size: contain;
+				vertical-align: middle;
+			}
+			
+		</style>
+		<script src="../js/transition.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.js"></script>
+		<script>
+
+			const courses = {
+				GATTSURI: "ガッツリコース",
+				OTEGARU: "お手軽コース",
+				JUKEN: "受験コース"
+			};
+			const numberOfQuestions = {
+				GATTSURI: 35,
+				OTEGARU: 20,
+				JUKEN: 17
+			}
+			var course;
+			var score;
+			var rank;
+			var switchScreen = 0; // 0がスコア、1が判定画面
+
+			var judgement = "";
+			var judgeMessage = "";
+
+			window.onload = function() {
+				course = (new URL(location.href)).searchParams.get("course");
+				document.getElementById("course_icon").setAttribute("src", "../img/" + course + ".png");
+				document.getElementById("course_name").textContent = courses[course];
+				setTimeout(() => {
+					score = localStorage.getItem("temporary");
+					if (!localStorage.getItem(course)) {
+					// if (true) {
+						localStorage.setItem(course, score);
+						var params = {
+							course: course,
+							userid: localStorage.getItem("userId"),
+							nickname: localStorage.getItem("nickname"),
+							score: score
+						};
+						var query_params = new URLSearchParams(params);
+						fetch("https://script.google.com/macros/s/AKfycbycc6vqzgXYaRSXJFzOTWHJQHp-JaE8NFfRzaYXOUbvnNbxDVDv_53D0caYML7JgooEZA/exec?" + query_params).then(response => {
+							response.text().then((result) => {
+								rank = result;
+								localStorage.setItem(course + "_rank", rank);
+								document.getElementById("yourrank").textContent = rank + "\n";
+							}).catch(error => {});}).catch(error => {console.log(error);
+						});
+					} else {
+						rank = "初回回答時順位：" + localStorage.getItem(course + "_rank");
+					}
+					displayResult();
+				}, 10);
+			}
+
+			function displayResult() {
+				document.getElementById("totalscore").textContent = score;
+				document.getElementById("yourrank").textContent = rank + "\n";
+				document.getElementById("nickname").textContent = localStorage.getItem("nickname") + "さん";
+				document.getElementById("nickname2").textContent = localStorage.getItem("nickname") + "さん";
+
+				const studentsAverage = numberOfQuestions[course] * 100;
+				if (score > studentsAverage) {
+					judgement = "上位合格！";
+					judgeMessage = "合格者平均点を上回る、余裕の実力ですね！\n理一25組でお待ちしてます！";
+				} else if (score > studentsAverage * 0.907) {
+					judgement = "合格！";
+					judgeMessage = "合格おめでとうございます！\n他のコースにもチャレンジしてみてね！";
+				} else {
+					judgement = "不合格...";
+					judgeMessage = "今後の努力に期待します！\n他のコースにもチャレンジしてみてね！";
+				}
+				document.getElementById("judgement_label").textContent = judgement;
+				document.getElementById("judge_message").textContent = judgeMessage;
+			}
+
+			function switchView() {
+				if (switchScreen == 0) {
+					switchScreen = 1;
+					document.getElementById("switchview").textContent = "得点を表示";
+					document.getElementById("scores").classList.add("fadeOut");
+					setTimeout(() => {
+						document.getElementById("scores").classList.add("gone");
+						document.getElementById("judgement").classList.remove("gone");
+						document.getElementById("judgement").classList.remove("fadeOut");
+					}, 200);
+				} else {
+					switchScreen = 0;
+					document.getElementById("switchview").textContent = "判定を表示";
+					document.getElementById("judgement").classList.add("fadeOut");
+					setTimeout(() => {
+						document.getElementById("judgement").classList.add("gone");
+						document.getElementById("scores").classList.remove("gone");
+						document.getElementById("scores").classList.remove("fadeOut");
+					}, 200);
+				}
+			}
+
+			function share() {
+				// 画像をセッション・ストレージに保存する
+				html2canvas(document.body, {
+					onrendered: function(canvas){
+          				var imgData = canvas.toDataURL();
+						window.sessionStorage.setItem("screenshot", imgData);
+        			}
+				});
+				window.sessionStorage.setItem("sns",
+					"#Quiz25 結果発表！\n\n>>> " + localStorage.getItem("nickname") + "さん <<<\n"
+					+ courses[course] + "　" + score + "点\n" + rank
+					+ "\n\n>>> 判定結果 <<<\n" + judgement + "\n" + judgeMessage
+					+ "\n\n\n東大理一25組「Quiz 25」");
+				setTimeout(() => {
+					transit('../share/index.html');
+				}, 40);
+			}
+			
+		</script>
+	</head>
+	<body>
+		
+		<header>
+			<a class="left" onclick="transit('../index.html');"><img src="../img/quiz25.png"></a>
+			<!-- <a class="right"><img src="../img/hamburger.png"></a> -->
+		</header>
+
+		<div class="fader coverScreen">
+
+			<div id="progress">
+				<img id="course_icon" src="../img/gattsuri.png" style="width: 60px; height: 60px">　
+				<h3 id="course_name">ガッツリコース</h3>　
+				<h2>結果発表</h2>
+			</div>
+
+			<div id="scores" class="fader" style="margin-top: 10vh; margin-bottom: 20vh;">
+				<h2 id="nickname" style="margin: 0;"></h2>
+				<h1 style="margin-bottom: 0; margin-top: 8px;"><span id="totalscore">391</span>点</h1>
+				<h2 id="yourrank" style="margin-top: 0;"></h2>
+			</div>
+
+			<div id="judgement" class="fader fadeOut gone" style="margin-top: 10vh; margin-bottom: 20vh;">
+				<h2 id="nickname2" style="margin: 0;"></h2>
+				<h1 style="margin-bottom: 0; margin-top: 8px;"><span id="judgement_label">391</span></h1>
+				<h2 id="judge_message" style="margin-top: 0;"></h2>
+			</div>
+
+			<div id="menu">
+				<button id="share" onclick="share()" class="primary blue">共有する</button>
+				<button id="switchview" onclick="switchView();" class="primary red triangle">判定を表示</button>
+				<button id="ranking" onclick="transit('../ranking/index.html?course=' + course)" class="primary green triangle">ランキング</button>
+			</div>
+			
+		</div>
+
+
+	</body>
+</html>

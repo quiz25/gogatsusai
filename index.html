@@ -1,0 +1,127 @@
+<!-- Choose Course QUIZ25 -->
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Quiz 25</title>
+		<link rel="icon" href="./img/favicon.ico">
+		<link rel="stylesheet" href="./style/master.css">
+		<style>
+			#courselist {
+				display: grid;
+				grid-template-columns: 100px 300px 300px 200px;
+				column-gap: 20px;
+				row-gap: 40px;
+				align-items: center;
+			}
+
+			#courselist div {
+				text-align: left;
+			}
+
+			#courselist h2 {
+				margin-bottom: 4px;
+			}
+
+			#courselist > img {
+				width: 100%;
+			}
+
+			.ranking {
+				display: flex;
+				align-items: center;
+			}
+
+			.ranking img {
+				width: 30px;
+				height: 30px;
+			}
+
+			.ranking span {
+				font-size: x-large;
+			}
+		</style>
+		<script src="./js/transition.js"></script>
+		<script>
+
+			window.onload = function() {
+				let userId = localStorage.getItem("userId");
+				if (userId) {
+					
+				} else {
+					location.href = "./welcome/index.html";
+				}
+				if (!localStorage.getItem("helpok")) {
+					location.href = "./help/index.html";
+				}
+
+				const gattsuriscore = localStorage.getItem("GATTSURI");
+				const otegaruscore = localStorage.getItem("OTEGARU");
+				const jukenscore = localStorage.getItem("JUKEN");
+				if (gattsuriscore) {
+					document.getElementById("GATTSURI_SCORE").textContent = gattsuriscore;
+				}
+				if (otegaruscore) {
+					document.getElementById("OTEGARU_SCORE").textContent = otegaruscore;
+				}
+				if (jukenscore) {
+					document.getElementById("JUKEN_SCORE").textContent = jukenscore;
+				}
+
+			}
+			
+		</script>
+	</head>
+	<body>
+		
+		<header>
+			<a class="left" href=""><img src="./img/quiz25.png"></a>
+			<!-- <a class="right" href=""><img src="./img/hamburger.png"></a> -->
+		</header>
+
+		<div class="fader coverScreen">
+			<h1>ようこそ！</h1>
+			<br>
+
+			<div class="alignChildAtCenter">
+				<div id="courselist">
+					
+					<img src="./img/GATTSURI.png">
+					<div>
+						<h2>ガッツリコース</h2>
+						理一生が本気で考えた知能クイズ<br>全35問
+					</div>
+					<div class="ranking">
+						　　<span id="GATTSURI_SCORE"> - </span>点
+					</div>
+					<button onclick="transit('./quiz/index.html?course=GATTSURI')" class="secondary red triangle">始める</button>
+
+					<img src="./img/OTEGARU.png">
+					<div>
+						<h2>お手軽コース</h2>
+						常識の範疇内<br>全20問
+					</div>
+					<div class="ranking">
+						　　<span id="OTEGARU_SCORE"> - </span>点
+					</div>
+					<button onclick="transit('./quiz/index.html?course=OTEGARU')" class="secondary blue triangle">始める</button>
+
+					<img src="./img/JUKEN.png">
+					<div>
+						<h2>受験コース</h2>
+						東大受験を控えたあなたに<br>全17問
+					</div>
+					<div class="ranking">
+						　　<span id="JUKEN_SCORE"> - </span>点
+					</div>
+					<button onclick="transit('./quiz/index.html?course=JUKEN')" class="secondary green triangle">始める</button>
+
+				</div>
+					
+				</div>
+			</div>
+
+		</div>
+
+	</body>
+</html>
