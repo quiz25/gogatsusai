@@ -38,7 +38,7 @@
 					const sns = "#Quiz25 この問題が解けますか？\n\n>>> No." + qId + " <<<\n"
 						+ (question.length > 60 ? (question).slice(0,60)+"…" : question) + "\n\nあなたも挑戦してみましょう！\n-------------\n東大理一25組「Quiz 25」\n";
 					const twitter = encodeURIComponent(sns);
-					link = "https://quiz25.github.io/gogatsusai/index.html?qId=" + qId;
+					link = "https://quiz25.github.io/gogatsusai/share.html?qId=" + qId;
 					const line = twitter + "%0d" + link;
 
 					document.getElementById("twitter").href = "https://twitter.com/intent/tweet?text=" + twitter + "&url=" + link;
